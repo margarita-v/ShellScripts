@@ -13,16 +13,20 @@ print_info() {
         echo	
 }
 
-if [[ $# == 1 ]]; then
-	if [[ $1 == "--help" ]]; then
-		print_info
-	elif ! [[ $1 =~ $NUMBER_EXP ]]; then
-		echo "Error: " $1 " is not a natural number"
-		exit 1
+solve() {
+	if [[ $# == 1 ]]; then
+		if [[ $1 == "--help" ]]; then
+			print_info
+		elif ! [[ $1 =~ $NUMBER_EXP ]]; then
+			echo "Error: " $1 " is not a natural number"
+			exit 1
+		else
+			echo "Sum = " $(( ($1*($1 + 1))/2 ))
+		fi
 	else
-		echo "Sum = " $(( ($1*($1 + 1))/2 ))
+		echo $ERROR
+		print_info
 	fi
-else
-	echo $ERROR
-	print_info
-fi
+}
+
+solve $@
