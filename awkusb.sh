@@ -38,3 +38,6 @@ awk '/'$IDVENDOR'/ {
 	usbNumber = substr($2, 0, length($2) - 1)
 	usbName = substr($4, 0, length($4))
 	print vendor " " usbName " " usbNumber }' dmesg.txt >> $TEMPFILE
+
+awk '{ print "\n" "'$IDVENDOR'" ": " $1 "\n" $2 " " $3 }' $TEMPFILE
+rm -f $TEMPFILE
