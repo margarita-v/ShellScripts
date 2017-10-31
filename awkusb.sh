@@ -36,5 +36,5 @@ awk '/'$IDVENDOR'/ {
 	# Печатаем найденные значения полей во временный файл
 	vendor = substr($0, vendorBegin, vendorEnd - vendorBegin)
 	usbNumber = substr($2, 0, length($2) - 1)
-	usbName = substr($4, 0, length($4) - 1)
-	print vendor " " usbNumber " " usbName }' dmesg.txt >> $TEMPFILE
+	usbName = substr($4, 0, length($4))
+	print vendor " " usbName " " usbNumber }' dmesg.txt >> $TEMPFILE
