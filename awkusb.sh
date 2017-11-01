@@ -7,14 +7,14 @@
 
 #idVendor : BBB
 #total : 3
-#usb1 : 0000:00:13.1 #usb2 : 0000:00:13.2
+#usb1 : 0000:00:13.1 
+#usb2 : 0000:00:13.2
 #usb3 : 0000:00:13.3
 
 #Задача делается при помощи AWK, при этом конечный результат при помощи latex выводится в PDF-файл.
 
 USAGE="Usage: awkusb [--help]"
 INFO="Используя вывод команды dmesg, вывести список usb-устройств, сгруппированных по idVendor."
-TEMPFILE=tmp.txt
 IDVENDOR="idVendor"
 IDPRODUCT="idProduct"
 
@@ -36,8 +36,25 @@ awk '/'$IDVENDOR'/ {
 	# Печатаем найденные значения полей во временный файл
 	vendor = substr($0, vendorBegin, vendorEnd - vendorBegin)
 	usbNumber = substr($2, 0, length($2) - 1)
-	usbName = substr($4, 0, length($4))
-	print vendor " " usbName " " usbNumber }' dmesg.txt >> $TEMPFILE
-
-awk '{ print "\n" "'$IDVENDOR'" ": " $1 "\n" $2 " " $3 }' $TEMPFILE
-rm -f $TEMPFILE
+	usbName = substr($4, 0, length($4)) 
+	
+	# Создаем строку с информацией о usb
+	str = usbName " " usbNumber
+	# Если информация с id = vendor уже есть в массиве,
+	# мы должны добавить новую информацию о usb; иначе создаем запись с id = vendor
+	if (!(vendor in vendorArr))
+  		vendorArr[vendor] = str
+	else
+  		vendorArr[vendor] = vendorArr[vendor] ";" str
+} 
+END {
+	for (key in vendorArr) {
+		# Получаем массив с информацией о usb для конкретного vendor
+    		split(vendorArr[key], usbArr, ";")
+    		print "\n" "'$IDVENDOR'" ": " key
+		print "total: " length(usbArr)
+    		for (usb in usbArr) {
+      			print usbArr[usb]
+    		}
+  	}	
+}' dmesg.txt
