@@ -17,6 +17,7 @@ USAGE="Usage: awkusb [--help]"
 INFO="Используя вывод команды dmesg, вывести список usb-устройств, сгруппированных по idVendor."
 IDVENDOR="idVendor"
 IDPRODUCT="idProduct"
+TOTAL="total"
 
 if [[ $1 == "--help" ]]; then
         echo $USAGE
@@ -36,7 +37,7 @@ awk '/'$IDVENDOR'/ {
 	# Печатаем найденные значения полей во временный файл
 	vendor = substr($0, vendorBegin, vendorEnd - vendorBegin)
 	usbNumber = substr($2, 0, length($2) - 1)
-	usbName = substr($4, 0, length($4)) 
+	usbName = substr($4, 0, length($4) - 1) 
 	
 	# Создаем строку с информацией о usb
 	str = usbName " " usbNumber
@@ -49,25 +50,31 @@ awk '/'$IDVENDOR'/ {
 } 
 END {
 	line = "\\\\ \\hline\n"
+	format = "%s & %s"
 
 	printf "\\documentclass{article}\n"
   	printf "\\usepackage[utf8]{inputenc}\n"
 	printf "\\usepackage[english]{babel}\n";
   	printf "\\begin{document}\n"
-  	printf "\\begin{tabular}{| c |}\n"
+  	printf "\\begin{tabular}{| c | c |}\n"
 	printf "\\hline\n"
 
 	for (key in vendorArr) {
 		# Получаем массив с информацией о usb для конкретного vendor
     		split(vendorArr[key], usbArr, ";")
-    		printf "'$IDVENDOR': "key
+    		printf format, "'$IDVENDOR'", key
 		printf line
-		printf "total: "length(usbArr)
+		printf format, "'$TOTAL'", length(usbArr)
 		printf line
     		for (usb in usbArr) {
-      			printf usbArr[usb]
+			# Выделяем из строки название usb и его номер
+			i = index(usbArr[usb], " ")
+			name = substr(usbArr[usb], 0, i - 1)
+			value = substr(usbArr[usb], i + 1)
+			printf format, name, value
 			printf line
     		}
+		printf "\\multicolumn{2}{|c|}{}\n"
 		printf line
   	}	
 	printf "\\end{tabular}\n"
