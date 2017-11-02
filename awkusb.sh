@@ -18,17 +18,6 @@ INFO="Используя вывод команды dmesg, вывести спи�
 IDVENDOR="idVendor"
 IDPRODUCT="idProduct"
 
-HEADER="
-\\documentclass{article}
-\\usepackage[utf8]{inputenc}
-\\begin{document}
-\\begin{tabular}{| c |}
-\\hline"
-
-FOOTER="
-\\end{tabular}
-\\end{document}"
-
 if [[ $1 == "--help" ]]; then
         echo $USAGE
         echo $INFO
@@ -59,25 +48,28 @@ awk '/'$IDVENDOR'/ {
   		vendorArr[vendor] = vendorArr[vendor] ";" str
 } 
 END {
-	printf "\\documentclass{article}\n";
-  	printf "\\usepackage[utf8]{inputenc}\n";
-  	printf "\\begin{document}\n";
-  	printf "\\begin{tabular}{| c |}\n";
-	printf "\\hline\n";
+	line = "\\\\ \\hline\n"
+
+	printf "\\documentclass{article}\n"
+  	printf "\\usepackage[utf8]{inputenc}\n"
+	printf "\\usepackage[english]{babel}\n";
+  	printf "\\begin{document}\n"
+  	printf "\\begin{tabular}{| c |}\n"
+	printf "\\hline\n"
 
 	for (key in vendorArr) {
 		# Получаем массив с информацией о usb для конкретного vendor
     		split(vendorArr[key], usbArr, ";")
-    		printf "idVendor: "key;
-		printf "\\\\ \\hline\n";
-		printf "total: "length(usbArr);
-		printf "\\\\ \\hline\n";
+    		printf "'$IDVENDOR': "key
+		printf line
+		printf "total: "length(usbArr)
+		printf line
     		for (usb in usbArr) {
-      			printf usbArr[usb];
-			printf "\\\\ \\hline\n";
+      			printf usbArr[usb]
+			printf line
     		}
-		printf "\\\\ \\hline\n";
+		printf line
   	}	
-	printf "\\end{tabular}\n";
-  	printf "\\end{document}\n";
+	printf "\\end{tabular}\n"
+  	printf "\\end{document}"
 }' dmesg.txt | pdflatex
